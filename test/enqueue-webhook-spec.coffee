@@ -16,15 +16,23 @@ describe 'EnqueueWebhooks', ->
 
   beforeEach ->
     @redisKey = uuid.v1()
+    pepper = 'im-a-pepper'
     @jobManager = new JobManager
       client: _.bindAll redis.createClient @redisKey
       timeoutSeconds: 1
+
+    @tokenManager = generateAndStoreTokenInCache: sinon.stub().yields null, 'abc123'
+
+    @cache = _.bindAll redis.createClient @redisKey
 
     @uuidAliasResolver = resolve: (uuid, callback) => callback(null, uuid)
     options = {
       @datastore
       @uuidAliasResolver
       @jobManager
+      pepper
+      @cache
+      @tokenManager
     }
 
     @sut = new EnqueueWebhooks options
@@ -74,7 +82,7 @@ describe 'EnqueueWebhooks', ->
               done error
 
           it 'should create a job', ->
-            expect(@request.metadata.auth).to.deep.equal uuid: 'whoever-uuid', token: 'some-token'
+            expect(@request.metadata.auth).to.deep.equal uuid: 'someone-uuid', token: 'abc123'
             expect(@request.metadata.jobType).to.equal 'DeliverWebhook'
             expect(@request.metadata.toUuid).to.equal 'emitter-uuid'
             expect(@request.metadata.messageType).to.equal 'broadcast'
@@ -129,7 +137,7 @@ describe 'EnqueueWebhooks', ->
               done error
 
           it 'should create a job', ->
-            expect(@request.metadata.auth).to.deep.equal uuid: 'whoever-uuid', token: 'some-token'
+            expect(@request.metadata.auth).to.deep.equal uuid: 'someone-uuid', token: 'abc123'
             expect(@request.metadata.jobType).to.equal 'DeliverWebhook'
             expect(@request.metadata.toUuid).to.equal 'emitter-uuid'
             expect(@request.metadata.messageType).to.equal 'sent'
@@ -187,7 +195,7 @@ describe 'EnqueueWebhooks', ->
               done error
 
           it 'should create a job', ->
-            expect(@request.metadata.auth).to.deep.equal uuid: 'whoever-uuid', token: 'some-token'
+            expect(@request.metadata.auth).to.deep.equal uuid: 'someone-uuid', token: 'abc123'
             expect(@request.metadata.jobType).to.equal 'DeliverWebhook'
             expect(@request.metadata.toUuid).to.equal 'emitter-uuid'
             expect(@request.metadata.messageType).to.equal 'sent'
@@ -204,7 +212,7 @@ describe 'EnqueueWebhooks', ->
                 done error
 
             it 'should create another job', ->
-              expect(@request.metadata.auth).to.deep.equal uuid: 'whoever-uuid', token: 'some-token'
+              expect(@request.metadata.auth).to.deep.equal uuid: 'someone-uuid', token: 'abc123'
               expect(@request.metadata.jobType).to.equal 'DeliverWebhook'
               expect(@request.metadata.toUuid).to.equal 'emitter-uuid'
               expect(@request.metadata.messageType).to.equal 'sent'
@@ -258,7 +266,7 @@ describe 'EnqueueWebhooks', ->
             done error
 
         it 'should create a job', ->
-          expect(@request.metadata.auth).to.deep.equal uuid: 'whoever-uuid', token: 'some-token'
+          expect(@request.metadata.auth).to.deep.equal uuid: 'emitter-uuid', token: 'abc123'
           expect(@request.metadata.jobType).to.equal 'DeliverWebhook'
           expect(@request.metadata.toUuid).to.equal 'emitter-uuid'
           expect(@request.metadata.messageType).to.equal 'received'
