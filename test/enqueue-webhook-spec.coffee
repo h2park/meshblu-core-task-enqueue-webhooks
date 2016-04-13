@@ -273,3 +273,49 @@ describe 'EnqueueWebhooks', ->
             url: 'http://requestb.in/18gkt511'
             method: 'POST'
             type: 'webhook'
+
+    context 'messageType: broadcast with new style hooks', ->
+      beforeEach (done) ->
+        record =
+          uuid: 'emitter-uuid'
+          meshblu:
+            forwarders:
+              broadcast:
+                sent: [
+                  type: 'webhook'
+                  url: 'http://requestb.in/18gkt511',
+                  method: 'POST'
+                ]
+
+        @datastore.insert record, done
+
+      beforeEach (done) ->
+        request =
+          metadata:
+            auth:
+              uuid: 'whoever-uuid'
+              token: 'some-token'
+            responseId: 'its-electric'
+            toUuid: 'emitter-uuid'
+            fromUuid: 'emitter-uuid'
+            messageType: 'broadcast'
+          rawData: '{"devices":["emitter-uuid"]}'
+
+        @sut.do request, (error, @response) => done error
+
+      it 'should return a 204', ->
+        expectedResponse =
+          metadata:
+            responseId: 'its-electric'
+            code: 204
+            status: 'No Content'
+
+        expect(@response).to.deep.equal expectedResponse
+
+      describe 'the first job', ->
+        beforeEach (done) ->
+          @jobManager.getRequest ['request'], (error, @request) =>
+            done error
+
+        it 'should not create a job', ->
+          expect(@request).not.to.exist

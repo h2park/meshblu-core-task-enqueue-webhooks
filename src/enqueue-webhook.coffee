@@ -49,7 +49,7 @@ class EnqueueWebhooks
       return callback error if error?
 
       forwarders = device?.meshblu?.forwarders?[messageType]
-      return callback null unless forwarders?
+      return callback null unless _.isArray forwarders
 
       async.eachSeries forwarders, (options, next) =>
         auth.uuid = lookupUuid
