@@ -1,12 +1,12 @@
-_ = require 'lodash'
-async = require 'async'
-UUID = require 'uuid'
+_             = require 'lodash'
+async         = require 'async'
+http          = require 'http'
+UUID          = require 'uuid'
 DeviceManager = require 'meshblu-core-manager-device'
-http = require 'http'
 
 class EnqueueWebhooks
   constructor: (options={},dependencies={}) ->
-    {@datastore,@jobManager, uuidAliasResolver,cache,pepper} = options
+    {@datastore,@jobManager, uuidAliasResolver} = options
     @deviceManager = new DeviceManager {@datastore, uuidAliasResolver}
 
   _doCallback: (request, code, callback) =>
@@ -54,7 +54,8 @@ class EnqueueWebhooks
       forwarders = device?.meshblu?.forwarders?[messageType]
       return callback null unless _.isArray forwarders
 
-      async.eachSeries forwarders, (options, next) =>
+      async.each forwarders, (options, next) =>
+        auth = _.cloneDeep auth
         auth.uuid = lookupUuid
         @_createJob {auth, uuid: lookupUuid, toUuid, fromUuid, messageType, message, options}, next
       , callback

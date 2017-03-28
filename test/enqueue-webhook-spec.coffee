@@ -1,9 +1,10 @@
-_ = require 'lodash'
-uuid = require 'uuid'
-redis = require 'fakeredis'
-mongojs = require 'mongojs'
-Datastore = require 'meshblu-core-datastore'
-JobManager = require 'meshblu-core-job-manager'
+{describe,beforeEach,it,expect} = global
+uuid            = require 'uuid'
+redis           = require 'fakeredis'
+mongojs         = require 'mongojs'
+Datastore       = require 'meshblu-core-datastore'
+JobManager      = require 'meshblu-core-job-manager'
+RedisNS         = require '@octoblu/redis-ns'
 EnqueueWebhooks = require '../'
 
 describe 'EnqueueWebhooks', ->
@@ -19,10 +20,11 @@ describe 'EnqueueWebhooks', ->
     @redisKey = uuid.v1()
     pepper = 'im-a-pepper'
     @jobManager = new JobManager
-      client: _.bindAll redis.createClient @redisKey
+      client: new RedisNS 'ns', redis.createClient(@redisKey)
       timeoutSeconds: 1
+      jobLogSampleRate: 1
 
-    @cache = _.bindAll redis.createClient @redisKey
+    @cache = new RedisNS 'ns', redis.createClient(@redisKey)
 
     @uuidAliasResolver = resolve: (uuid, callback) => callback(null, uuid)
     options = {
@@ -36,8 +38,8 @@ describe 'EnqueueWebhooks', ->
     @sut = new EnqueueWebhooks options
 
   describe '->do', ->
-    context 'messageType: broadcast', ->
-      context 'when given a device', ->
+    describe 'messageType: broadcast', ->
+      describe 'when given a device', ->
         beforeEach (done) ->
           record =
             uuid: 'someone-uuid'
@@ -91,8 +93,8 @@ describe 'EnqueueWebhooks', ->
               method: 'POST'
               type: 'webhook'
 
-    context 'messageType: sent', ->
-      context 'when given a device', ->
+    describe 'messageType: sent', ->
+      describe 'when given a device', ->
         beforeEach (done) ->
           record =
             uuid: 'someone-uuid'
@@ -146,7 +148,7 @@ describe 'EnqueueWebhooks', ->
               method: 'POST'
               type: 'webhook'
 
-      context 'when given a device with two webhooks of the same type', ->
+      describe 'when given a device with two webhooks of the same type', ->
         beforeEach (done) ->
           record =
             uuid: 'someone-uuid'
@@ -221,7 +223,7 @@ describe 'EnqueueWebhooks', ->
                 method: 'GET'
                 type: 'webhook'
 
-    context 'messageType: received', ->
+    describe 'messageType: received', ->
       beforeEach (done) ->
         record =
           uuid: 'emitter-uuid'
@@ -275,7 +277,7 @@ describe 'EnqueueWebhooks', ->
             method: 'POST'
             type: 'webhook'
 
-    context 'messageType: broadcast with new style hooks', ->
+    describe 'messageType: broadcast with new style hooks', ->
       beforeEach (done) ->
         record =
           uuid: 'emitter-uuid'

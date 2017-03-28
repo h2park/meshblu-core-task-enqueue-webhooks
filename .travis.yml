@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- '5'
+- '7'
 services:
 - mongodb
 env:
@@ -11,20 +11,6 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
-  code_climate:
-    repo_token: 94a6ad73c0193e5176b2e630e987642fb0666685719a0dd8fc773d1b3a16a3ad
-before_script:
-- npm install -g codeclimate-test-reporter
-after_script:
-- codeclimate-test-reporter < coverage/lcov.info
-deploy:
-  provider: npm
-  email: serveradmin@octoblu.com
-  api_key:
-    secure: y3kyzY8Q1hyfz0g6mBAv2x+vRbUlMF1MZxpgGXlUBkrKUSvf1aS2Gu6rdif7AwPVCIGTMSffR6d+VzI8u0Mhf+qW1cnNvngbPeO3m1/9SQnXC2QrZZDr2IBmL9tvgf8lX/rFlmk/AS49eWIsI/REvGWuEcUL8/6Xp4KCr32t/FWIB1ZDIJiRiLMHfrc9MT62rjrXmVVJJClrDU4fCYTGdiFZhr8NOW42M0Tez6w7cwpCmluo1g0oTx6uptYUaGokYtc36B+f8DKcHFoP6FohmSBFmD+0OAs9t9FGvxQoPye4UXhzZ6Day983TRZGMI6jYMJKi9jScp0yBzrBK3SyXHZ6w5B2eUybGlexmps0Ft4/BEGbXduIifraN+e+AJFl4dVQyyi1L9rYFiIS6NYVY3NW6nkD34hdJUMDPGDnv8VBoOQa36GFyIKGUmIci8JUfeBjAzYZIBZEvimRlO+CpB3Hi1maGmpnRc0qIRU1YutsOoCJhbPUFypBpG5WqFGl4Ca7ksBOkdX2KSF5Ip+GQ5aKzzj9a3H/JWUXX6+lemlqJcYQZtF5GC/K4HFpKMhapjkxpadbgpGPODP4b39J6T3yNYfT2QAqeyk3+32onr/Sat85CSfkXNlPGO1u++FmMG4O4X50r+Rg03mqobQz+3kl3s/07+bjK2OGB9dlznw=
-  on:
-    tags: true
-    branches: true
 branches:
   only:
   - "/^v[0-9]/"
@@ -33,3 +19,11 @@ after_success:
 - npm run mocha:json
 - bash <(curl -s https://codecov.io/bash)
 - bash <(curl -s https://codecov.octoblu.com/bash)
+deploy:
+  provider: npm
+  email: serveradmin@octoblu.com
+  api_key:
+    secure: y3kyzY8Q1hyfz0g6mBAv2x+vRbUlMF1MZxpgGXlUBkrKUSvf1aS2Gu6rdif7AwPVCIGTMSffR6d+VzI8u0Mhf+qW1cnNvngbPeO3m1/9SQnXC2QrZZDr2IBmL9tvgf8lX/rFlmk/AS49eWIsI/REvGWuEcUL8/6Xp4KCr32t/FWIB1ZDIJiRiLMHfrc9MT62rjrXmVVJJClrDU4fCYTGdiFZhr8NOW42M0Tez6w7cwpCmluo1g0oTx6uptYUaGokYtc36B+f8DKcHFoP6FohmSBFmD+0OAs9t9FGvxQoPye4UXhzZ6Day983TRZGMI6jYMJKi9jScp0yBzrBK3SyXHZ6w5B2eUybGlexmps0Ft4/BEGbXduIifraN+e+AJFl4dVQyyi1L9rYFiIS6NYVY3NW6nkD34hdJUMDPGDnv8VBoOQa36GFyIKGUmIci8JUfeBjAzYZIBZEvimRlO+CpB3Hi1maGmpnRc0qIRU1YutsOoCJhbPUFypBpG5WqFGl4Ca7ksBOkdX2KSF5Ip+GQ5aKzzj9a3H/JWUXX6+lemlqJcYQZtF5GC/K4HFpKMhapjkxpadbgpGPODP4b39J6T3yNYfT2QAqeyk3+32onr/Sat85CSfkXNlPGO1u++FmMG4O4X50r+Rg03mqobQz+3kl3s/07+bjK2OGB9dlznw=
+  on:
+    tags: true
+    branches: true
