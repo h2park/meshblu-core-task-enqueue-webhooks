@@ -322,3 +322,60 @@ describe 'EnqueueWebhooks', ->
 
         it 'should not create a job', ->
           expect(@request).not.to.exist
+
+  describe '->getUniqueForwarders', ->
+    describe 'when there are duplicates', ->
+      beforeEach ->
+        device =
+          meshblu:
+            forwarders:
+              'some-type': [
+                { method: 'UNIQUE', url: 1 }
+                { method: 'UNIQUE', url: 1 }
+                { method: 'UNIQUE', url: 2 }
+                { method: 'UNIQUE', url: 2 }
+              ]
+        @forwarders = @sut.getUniqueForwarders { device, messageType: 'some-type' }
+
+      it 'should have unique forwarders', ->
+        expect(@forwarders).to.deep.equal [
+          { method: 'UNIQUE', url: 1 }
+          { method: 'UNIQUE', url: 2 }
+        ]
+
+    describe 'when there are no dups', ->
+      beforeEach ->
+        device =
+          meshblu:
+            forwarders:
+              'some-type': [
+                { method: 'UNIQUE', url: 1 }
+                { method: 'UNIQUE', url: 2 }
+              ]
+        @forwarders = @sut.getUniqueForwarders { device, messageType: 'some-type' }
+
+      it 'should have unique forwarders', ->
+        expect(@forwarders).to.deep.equal [
+          { method: 'UNIQUE', url: 1 }
+          { method: 'UNIQUE', url: 2 }
+        ]
+
+    describe 'when there are no forwarders', ->
+      beforeEach ->
+        device =
+          meshblu: {}
+        @forwarders = @sut.getUniqueForwarders { device, messageType: 'some-type' }
+
+      it 'should have unique forwarders', ->
+        expect(@forwarders).to.be.null
+
+    describe 'when the forwarders are not an array', ->
+      beforeEach ->
+        device =
+          meshblu:
+            forwarders:
+              'some-type': {'oh': 'no'}
+        @forwarders = @sut.getUniqueForwarders { device, messageType: 'some-type' }
+
+      it 'should have unique forwarders', ->
+        expect(@forwarders).to.be.null
